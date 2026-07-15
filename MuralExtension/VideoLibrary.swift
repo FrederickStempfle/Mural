@@ -109,7 +109,11 @@ final class VideoLibrary: Sendable {
             .appendingPathComponent(id)
             .appendingPathComponent("metadata.json")
         if let entry = entry(for: id) {
-            try? JSONEncoder().encode(entry).write(to: metadataURL)
+            do {
+                try JSONEncoder().encode(entry).write(to: metadataURL)
+            } catch {
+                extensionLog("[VideoLibrary] Failed to write metadata for \(id): \(error)")
+            }
         }
         saveIndex(entries)
     }
@@ -263,7 +267,11 @@ final class VideoLibrary: Sendable {
             .appendingPathComponent(id)
             .appendingPathComponent("metadata.json")
         if let entry = entry(for: id) {
-            try? JSONEncoder().encode(entry).write(to: metadataURL)
+            do {
+                try JSONEncoder().encode(entry).write(to: metadataURL)
+            } catch {
+                extensionLog("[VideoLibrary] Failed to write metadata for \(id): \(error)")
+            }
         }
         saveIndex(entries)
     }
@@ -308,7 +316,11 @@ final class VideoLibrary: Sendable {
     // MARK: - Private
 
     private func saveIndex(_ entries: [VideoEntry]) {
-        try? JSONEncoder().encode(entries).write(to: indexURL, options: .atomic)
+        do {
+            try JSONEncoder().encode(entries).write(to: indexURL, options: .atomic)
+        } catch {
+            extensionLog("[VideoLibrary] Failed to save index: \(error)")
+        }
     }
 
     private func findVideoFile(in directory: URL) -> URL? {

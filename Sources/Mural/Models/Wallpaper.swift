@@ -48,15 +48,15 @@ enum WallpaperPreset: String, CaseIterable, Hashable, Codable {
     var colors: [NSColor] {
         switch self {
         case .quietTide:
-            [hex(0xD8E0D5), hex(0x91A89E), hex(0x426A66), hex(0x173D3D)]
+            [NSColor(hex: 0xD8E0D5), NSColor(hex: 0x91A89E), NSColor(hex: 0x426A66), NSColor(hex: 0x173D3D)]
         case .blueHour:
-            [hex(0xD7D8D4), hex(0x8D9BA8), hex(0x4A5968), hex(0x202936)]
+            [NSColor(hex: 0xD7D8D4), NSColor(hex: 0x8D9BA8), NSColor(hex: 0x4A5968), NSColor(hex: 0x202936)]
         case .ember:
-            [hex(0xE3C5A6), hex(0xC36B45), hex(0x783D35), hex(0x342725)]
+            [NSColor(hex: 0xE3C5A6), NSColor(hex: 0xC36B45), NSColor(hex: 0x783D35), NSColor(hex: 0x342725)]
         case .moss:
-            [hex(0xD4CEB4), hex(0x8E9773), hex(0x4E654F), hex(0x243A32)]
+            [NSColor(hex: 0xD4CEB4), NSColor(hex: 0x8E9773), NSColor(hex: 0x4E654F), NSColor(hex: 0x243A32)]
         case .plum:
-            [hex(0xD8C7CE), hex(0xAA7C8B), hex(0x704858), hex(0x372D39)]
+            [NSColor(hex: 0xD8C7CE), NSColor(hex: 0xAA7C8B), NSColor(hex: 0x704858), NSColor(hex: 0x372D39)]
         }
     }
 
@@ -68,15 +68,6 @@ enum WallpaperPreset: String, CaseIterable, Hashable, Codable {
         case .moss: 0.67
         case .plum: 0.86
         }
-    }
-
-    private func hex(_ value: UInt32) -> NSColor {
-        NSColor(
-            red: CGFloat((value >> 16) & 0xff) / 255,
-            green: CGFloat((value >> 8) & 0xff) / 255,
-            blue: CGFloat(value & 0xff) / 255,
-            alpha: 1
-        )
     }
 }
 

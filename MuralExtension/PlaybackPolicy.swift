@@ -28,7 +28,6 @@ enum PlaybackPolicy: Int, Comparable {
         thermalState: ProcessInfo.ThermalState,
         isOnBattery: Bool,
         batteryLevel: Int,
-        isGameModeActive: Bool,
         displayBrightness: Float = 1.0,
     ) -> PlaybackPolicy {
         var worst: PlaybackPolicy = .full
@@ -39,7 +38,6 @@ enum PlaybackPolicy: Int, Comparable {
         if batteryLevel < 10 { worst = max(worst, .paused) }
         if activityState.contains("suspended") { worst = max(worst, .paused) }
         if presentationMode == "idle" { worst = max(worst, .paused) }
-        if isGameModeActive { worst = max(worst, .paused) }
         // User dimmed the backlight to ~zero. The display is technically still
         // "awake" so `screensDidSleep` doesn't fire and the WallpaperAgent never
         // switches to "idle", but the user can't see any of it.
@@ -62,24 +60,6 @@ enum PlaybackPolicy: Int, Comparable {
         return worst
     }
 
-    /// Generate FPS tiers by repeated halving from a source frame rate.
-    ///
-    /// Keeps halving until the result is at or below 15 fps. Always produces at least 2 tiers.
-    /// Examples: 120 → [120, 60, 30, 15], 60 → [60, 30, 15], 30 → [30, 15], 24 → [24, 12].
-    static func fpsTiers(from sourceFPS: Int) -> [Int] {
-        guard sourceFPS > 0 else { return [] }
-        var tiers = [sourceFPS]
-        var current = sourceFPS
-        while current > 15 {
-            current /= 2
-            tiers.append(current)
-        }
-        if tiers.count < 2 {
-            tiers.append(current / 2)
-        }
-        return tiers
-    }
-
     /// Convenience overload that unpacks a `PowerMonitor.PowerState`.
     static func compute(
         presentationMode: String,
@@ -100,7 +80,6 @@ enum PlaybackPolicy: Int, Comparable {
             thermalState: powerState.thermalState,
             isOnBattery: powerState.isOnBattery,
             batteryLevel: powerState.batteryLevel,
-            isGameModeActive: powerState.isGameModeActive,
             displayBrightness: powerState.displayBrightness,
         )
     }

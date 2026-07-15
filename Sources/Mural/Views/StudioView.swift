@@ -7,10 +7,16 @@ import UniformTypeIdentifiers
 struct StudioView: View {
     @ObservedObject var store: WallpaperStore
 
-    @State private var design: StudioDesign = .initial
     @State private var name = ""
     @State private var selectedStickerID: UUID?
     @State private var isChoosingPhoto = false
+
+    /// The draft lives on the store, not in view state, so switching sidebar
+    /// sections and coming back doesn't discard an in-progress design.
+    private var design: StudioDesign {
+        get { store.studioDesign }
+        nonmutating set { store.studioDesign = newValue }
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -332,7 +338,7 @@ struct StudioView: View {
         VStack(alignment: .leading, spacing: 9) {
             sectionLabel("Variation")
             HStack(spacing: 10) {
-                Slider(value: $design.seed, in: 0...1)
+                Slider(value: $store.studioDesign.seed, in: 0...1)
                     .tint(Paper.accent)
                     .controlSize(.small)
                     .accessibilityLabel("Variation")
@@ -355,7 +361,7 @@ struct StudioView: View {
             sectionLabel("Colors")
             HStack(spacing: 10) {
                 ForEach(0..<4, id: \.self) { index in
-                    ColorPicker("", selection: $design.colors[index], supportsOpacity: false)
+                    ColorPicker("", selection: $store.studioDesign.colors[index], supportsOpacity: false)
                         .labelsHidden()
                         .accessibilityLabel("Color \(index + 1)")
                 }

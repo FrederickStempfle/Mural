@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import Testing
 @testable import Mural
@@ -12,17 +13,26 @@ import Testing
     #expect(Set(LibraryFilter.allCases.map(\.rawValue)).count == LibraryFilter.allCases.count)
 }
 
-@Test @MainActor func proceduralWallpaperRendersAsPNG() throws {
+@Test @MainActor func proceduralWallpaperRendersAsPNG() async throws {
     let directory = FileManager.default.temporaryDirectory
         .appendingPathComponent(UUID().uuidString, isDirectory: true)
     let url = directory.appendingPathComponent("quiet-tide.png")
     defer { try? FileManager.default.removeItem(at: directory) }
 
-    try WallpaperRenderer.render(.quietTide, to: url)
+    try await WallpaperRenderer.render(.quietTide, to: url)
 
     let data = try Data(contentsOf: url)
     #expect(data.starts(with: [0x89, 0x50, 0x4e, 0x47]))
     #expect(data.count > 100_000)
+}
+
+@Test func hexLiteralsDecodeToSRGBChannels() {
+    let color = NSColor(hex: 0x336699)
+    #expect(color.colorSpace == .sRGB)
+    #expect(abs(color.redComponent - 0x33 / 255) < 0.0001)
+    #expect(abs(color.greenComponent - 0x66 / 255) < 0.0001)
+    #expect(abs(color.blueComponent - 0x99 / 255) < 0.0001)
+    #expect(color.alphaComponent == 1)
 }
 
 @Test func curatedPalettesHaveFourColorsAndUniqueNames() {
@@ -32,7 +42,7 @@ import Testing
     #expect(Set(StudioPalette.curated.map(\.name)).count == StudioPalette.curated.count)
 }
 
-@Test @MainActor func everyStudioStyleRendersAsPNG() throws {
+@Test @MainActor func everyStudioStyleRendersAsPNG() async throws {
     let directory = FileManager.default.temporaryDirectory
         .appendingPathComponent(UUID().uuidString, isDirectory: true)
     defer { try? FileManager.default.removeItem(at: directory) }
@@ -40,7 +50,7 @@ import Testing
     for style in StudioStyle.allCases {
         let design = StudioDesign(backdrop: .style(style), colors: StudioPalette.curated[0].colors, seed: 0.5)
         let url = directory.appendingPathComponent("\(style.rawValue).png")
-        try WallpaperRenderer.render(design, to: url)
+        try await WallpaperRenderer.render(design, to: url)
 
         let data = try Data(contentsOf: url)
         #expect(data.starts(with: [0x89, 0x50, 0x4e, 0x47]))

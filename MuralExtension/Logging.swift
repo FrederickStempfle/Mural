@@ -91,25 +91,6 @@ private func rotateLog() {
     }
 }
 
-/// Recursively dump an object's Mirror for debugging XPC types.
-func dumpMirror(_ obj: Any, label: String = "root", depth: Int = 3, indent: Int = 0) {
-    let prefix = String(repeating: "  ", count: indent)
-    let mirror = Mirror(reflecting: obj)
-    extensionLog("\(prefix)[\(label)] type=\(type(of: obj)) children=\(mirror.children.count)")
-    guard depth > 0 else { return }
-    for child in mirror.children {
-        let childLabel = child.label ?? "?"
-        let childValue = child.value
-        let desc = String(describing: childValue).prefix(200)
-        extensionLog("\(prefix)  .\(childLabel) = \(desc)")
-        // Recurse into non-primitive types
-        let childMirror = Mirror(reflecting: childValue)
-        if childMirror.children.count > 0, !(childValue is String), !(childValue is Data), !(childValue is URL) {
-            dumpMirror(childValue, label: childLabel, depth: depth - 1, indent: indent + 2)
-        }
-    }
-}
-
 /// When true, high-volume per-switch/per-frame diagnostics (`traceLog`) are written too.
 /// OFF by default so normal logs stay focused on switches, state changes, and errors.
 /// Enable for deep debugging by creating a `VERBOSE_LOG` marker file in the container

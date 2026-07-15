@@ -61,7 +61,6 @@ final class WallpaperState: Sendable {
         var currentVideoID: String? = UserDefaults.standard.string(forKey: WallpaperState.selectedVideoKey)
         var presentationMode: String = "active"
         var activityState: String = "active"
-        var isDisplayAsleep: Bool = false
         var isScreenLocked: Bool = false
     }
 
@@ -254,13 +253,6 @@ final class WallpaperState: Sendable {
         lock.withLock { $0.contexts.count }
     }
 
-    /// Count of display slots with a running renderer.
-    var liveContextCount: Int {
-        lock.withLock { state in
-            state.contexts.values.lazy.count(where: { $0.renderer != nil })
-        }
-    }
-
     /// Whether this display already has a live renderer for the same surface *role*
     /// (preview vs. live desktop) — i.e. an existing Mural surface WallpaperAgent
     /// is already hosting in the SAME CALayerHost this new acquire targets. Only such a
@@ -314,12 +306,6 @@ final class WallpaperState: Sendable {
     var activityState: String {
         get { lock.withLock { $0.activityState } }
         set { lock.withLock { $0.activityState = newValue } }
-    }
-
-    /// Whether all displays are currently asleep.
-    var isDisplayAsleep: Bool {
-        get { lock.withLock { $0.isDisplayAsleep } }
-        set { lock.withLock { $0.isDisplayAsleep = newValue } }
     }
 
     /// Whether the screen is currently locked (lock screen showing).

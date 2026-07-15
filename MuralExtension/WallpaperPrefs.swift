@@ -154,20 +154,6 @@ final class WallpaperPrefs: @unchecked Sendable {
         )
     }
 
-    func stopObserving() {
-        guard isObservingChanges else { return }
-        isObservingChanges = false
-
-        let center = CFNotificationCenterGetDarwinNotifyCenter()
-        let observer = Unmanaged.passUnretained(self).toOpaque()
-        CFNotificationCenterRemoveObserver(
-            center,
-            observer,
-            CFNotificationName("local.mural.wallpapers.prefsChanged" as CFString),
-            nil,
-        )
-    }
-
     /// Recompute playback policy and apply to all active renderers.
     /// Uses ramp animation for occlusion transitions (desktop covered/uncovered).
     private var previousDesktopOccluded = false

@@ -237,13 +237,6 @@ final class WallpaperXPCHandler: NSObject, WallpaperExtensionXPCProtocol {
         let videoURL = findVideoURL(forChoice: choiceConfiguration)
         let cachedStill = loadCachedSnapshotImage(forChoice: choiceConfiguration)
 
-        // Diagnostic bisection: host a still only (no video pipeline). Same context
-        // reuse/create/reply as below — that's what we're stress-testing — but no renderer.
-        if Bisect.stillOnly {
-            acquireStillOnlyBisect(key: key, displayID: displayID, destSize: destSize, scaleFactor: scaleFactor, videoURL: videoURL, cachedStill: cachedStill, choice: choiceConfiguration, reply: reply)
-            return
-        }
-
         // ---- REUSE: the display's single persistent context already exists ----
         // Return the SAME contextId regardless of whether this is the desktop or a
         // Settings-preview acquire — both host one surface (no gray gap, no
@@ -255,8 +248,6 @@ final class WallpaperXPCHandler: NSObject, WallpaperExtensionXPCProtocol {
                 reply(nil, NSError(domain: "MuralExtension", code: 3, userInfo: nil)); return
             }
             reply(replyObj, nil)
-
-            if ColorDiag.enabled { colorDiagInstall(rootLayer: existing.rootLayer, for: key); return }
 
             if existing.videoID == choiceConfiguration, existing.renderer != nil {
                 traceLog("  [acquire] SAME choice (\(choiceConfiguration ?? "nil")) + renderer present → no swap")
@@ -348,8 +339,6 @@ final class WallpaperXPCHandler: NSObject, WallpaperExtensionXPCProtocol {
         // video, matching Apple's own extensions (which likewise don't reply until ready).
         // Every branch below still replies exactly once so the acquire can never hang.
 
-        if ColorDiag.enabled { reply(replyObj, nil); colorDiagInstall(rootLayer: rootLayer, for: key); return }
-
         guard let videoURL else {
             // No video file — solid gradient fallback. Static content, so it's ready as
             // soon as it's installed; reply immediately.
@@ -432,52 +421,6 @@ final class WallpaperXPCHandler: NSObject, WallpaperExtensionXPCProtocol {
         }
         let w = Int(destSize.width * scaleFactor), h = Int(destSize.height * scaleFactor)
         Task { await writeBMPSnapshot(videoURL: videoURL, videoID: choiceConfiguration, displayPixelWidth: w, displayPixelHeight: h) }
-    }
-
-    /// Bisection acquire: identical CAContext reuse/create/reply as `acquireBody`, but
-    /// hosts a still (via `bisectShowStill`) instead of a VideoRenderer. Runs on
-    /// `Lifecycle.queue`. See StillBisect.swift.
-    private func acquireStillOnlyBisect(key: DisplayKey, displayID: UInt32?, destSize: CGSize, scaleFactor: CGFloat, videoURL: URL?, cachedStill: CGImage?, choice: String?, reply: @escaping @Sendable (Any?, (any Error)?) -> Void) {
-        if let existing = WallpaperState.shared.context(for: key) {
-            traceLog("  [bisect] REUSE ctx=\(existing.contextId) display=\(key.displayID) stored=\(existing.videoID ?? "nil") new=\(choice ?? "nil")")
-            guard let replyObj = createRemoteContextXPC(contextId: existing.contextId) else {
-                reply(nil, NSError(domain: "MuralExtension", code: 3, userInfo: nil)); return
-            }
-            reply(replyObj, nil)
-            if existing.videoID == choice {
-                traceLog("  [bisect] SAME choice → no re-seed")
-                return
-            }
-            bisectShowStill(videoURL: videoURL, cachedStill: cachedStill, rootLayer: existing.rootLayer, for: key)
-            WallpaperState.shared.updateVideoID(choice, for: key)
-            return
-        }
-
-        var contextOptions: [String: Any] = [:]
-        if let did = displayID { contextOptions["displayId"] = did }
-        let caContextRaw: Any? = contextOptions.isEmpty
-            ? CAContext.remoteContext()
-            : CAContext.perform(NSSelectorFromString("remoteContextWithOptions:"), with: contextOptions)?.takeUnretainedValue()
-        guard let caContext = caContextRaw as? CAContext, caContext.contextId != 0 else {
-            reply(nil, NSError(domain: "MuralExtension", code: 4, userInfo: [NSLocalizedDescriptionKey: "Failed to create remote CAContext"]))
-            return
-        }
-        let rootLayer = CALayer()
-        rootLayer.frame = CGRect(origin: .zero, size: destSize)
-        rootLayer.contentsScale = scaleFactor
-        rootLayer.contentsGravity = .resizeAspectFill
-        caContext.layer = rootLayer
-        CATransaction.flush()
-        guard let replyObj = createRemoteContextXPC(contextId: caContext.contextId) else {
-            reply(nil, NSError(domain: "MuralExtension", code: 3, userInfo: nil)); return
-        }
-        WallpaperState.shared.installContext(
-            ActiveWallpaper(caContext: caContext, contextId: caContext.contextId, rootLayer: rootLayer, renderer: nil, displayID: displayID, videoID: choice, isPreview: acquiredAsPreview),
-            for: key,
-        )
-        reply(replyObj, nil)
-        traceLog("  [bisect] CREATED ctx=\(caContext.contextId) display=\(key.displayID) choice=\(choice ?? "nil")")
-        bisectShowStill(videoURL: videoURL, cachedStill: cachedStill, rootLayer: rootLayer, for: key)
     }
 
     private var previousPresentationMode = "default"
@@ -629,19 +572,9 @@ final class WallpaperXPCHandler: NSObject, WallpaperExtensionXPCProtocol {
     private func removeChoiceRequestBody(request: Any?, reply: @escaping @Sendable ((any Error)?) -> Void) {
         extensionLog("=== REMOVE CHOICE REQUEST ===")
 
-        // Extract video ID from the choice request using Mirror (same pattern as selectedChoicesDidChange)
-        var videoID: String?
-        if let reqObj = request as? NSObject {
-            let desc = String(describing: reqObj)
-            if let range = desc.range(of: "identifier: \"") {
-                let after = desc[range.upperBound...]
-                if let endQuote = after.firstIndex(of: "\"") {
-                    videoID = String(after[..<endQuote])
-                }
-            }
-        }
-
-        guard let videoID else {
+        // Extract our video ID from the choice request — Mirror-based, with a logged
+        // description-parse fallback (see extractChoiceIdentifier).
+        guard let videoID = request.flatMap(extractChoiceIdentifier(from:)) else {
             extensionLog("  [Remove] Could not extract video ID from request")
             reply(nil)
             return
@@ -687,24 +620,10 @@ final class WallpaperXPCHandler: NSObject, WallpaperExtensionXPCProtocol {
     private func selectedChoicesDidChangeBody(id: Any?, reply: @escaping @Sendable ((any Error)?) -> Void) {
         extensionLog("=== SELECTED CHOICES DID CHANGE ===")
 
-        // Extract the choice identifier from the WallpaperChoiceID
-        var choiceIdentifier: String?
-        if let idObj = id as? NSObject {
-            let mirror = Mirror(reflecting: idObj)
-            for child in mirror.children {
-                let desc = String(describing: child.value)
-                // Look for the identifier field which contains our video UUID
-                if let range = desc.range(of: "identifier: \"") {
-                    let after = desc[range.upperBound...]
-                    if let endQuote = after.firstIndex(of: "\"") {
-                        choiceIdentifier = String(after[..<endQuote])
-                    }
-                }
-            }
-        }
-
-        guard let videoID = choiceIdentifier else {
-            extensionLog("selectedChoicesDidChange: unknown choice \(String(describing: choiceIdentifier))")
+        // Extract the choice identifier (our video UUID) from the WallpaperChoiceID —
+        // Mirror-based, with a logged description-parse fallback (see extractChoiceIdentifier).
+        guard let videoID = id.flatMap(extractChoiceIdentifier(from:)) else {
+            extensionLog("selectedChoicesDidChange: could not extract choice identifier from id")
             reply(nil)
             return
         }
@@ -829,6 +748,27 @@ private func mirrorFindProperty(_ label: String, in value: Any, depth: Int = 0) 
     for child in Mirror(reflecting: value).children {
         if child.label == label { return child.value }
         if let found = mirrorFindProperty(label, in: child.value, depth: depth + 1) { return found }
+    }
+    return nil
+}
+
+/// Extract a choice identifier (our video UUID string) from a WallpaperChoice
+/// request/ID object. Mirror-based lookup of the `identifier` stored property is
+/// the primary mechanism (robust to XPC wrapper nesting); scanning the
+/// stringified description for `identifier: "` is kept only as a fallback, and
+/// logged loudly — if Apple changes either the property name or the description
+/// format we want it visible, not a silent extraction failure.
+private func extractChoiceIdentifier(from value: Any) -> String? {
+    if let identifier = mirrorFindProperty("identifier", in: value) as? String {
+        return identifier
+    }
+    let desc = String(describing: value)
+    if let idRange = desc.range(of: "identifier: \"") {
+        let after = desc[idRange.upperBound...]
+        if let endQuote = after.firstIndex(of: "\"") {
+            extensionLog("  [Choice] WARNING: Mirror found no String 'identifier' property — used description-parse fallback (did Apple's type layout change?)")
+            return String(after[..<endQuote])
+        }
     }
     return nil
 }

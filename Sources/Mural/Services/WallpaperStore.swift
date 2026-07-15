@@ -1,7 +1,10 @@
 import AppKit
 import Combine
 import Foundation
+import os
 import UniformTypeIdentifiers
+
+private let logger = Logger(subsystem: "local.mural.wallpapers", category: "library")
 
 @MainActor
 final class WallpaperStore: ObservableObject {
@@ -13,6 +16,10 @@ final class WallpaperStore: ObservableObject {
     @Published var isApplying = false
     @Published var message: String?
     @Published var errorMessage: String?
+
+    /// The Mural Studio draft. Lives on the store so switching sidebar
+    /// sections doesn't discard an unsaved design.
+    @Published var studioDesign: StudioDesign = .initial
 
     @Published private(set) var favoriteIDs: Set<String>
     @Published private(set) var recentIDs: [String]
@@ -152,25 +159,31 @@ final class WallpaperStore: ObservableObject {
     /// Renders a studio design into the imported library so it behaves like
     /// any other wallpaper the user added, then optionally applies it.
     func saveStudioDesign(_ design: StudioDesign, named proposedName: String, apply: Bool = false) {
+        guard !isApplying else { return }
         let trimmed = proposedName.trimmingCharacters(in: .whitespacesAndNewlines)
         let title = trimmed.isEmpty ? design.suggestedName : trimmed
-        do {
-            let directory = try importedDirectory()
-            try fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
-            let filename = title
-                .replacingOccurrences(of: "/", with: "-")
-                .replacingOccurrences(of: ":", with: "-")
-            let destination = uniqueDestination(for: "\(filename).png", in: directory)
-            try WallpaperRenderer.render(design, to: destination)
-            reload()
-            selectedID = "imported.\(destination.lastPathComponent)"
-            if apply {
-                applySelected()
-            } else {
-                message = "“\(title)” saved to My Wallpapers"
+        isApplying = true
+        Task {
+            defer { isApplying = false }
+            do {
+                let directory = try importedDirectory()
+                try fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
+                let filename = title
+                    .replacingOccurrences(of: "/", with: "-")
+                    .replacingOccurrences(of: ":", with: "-")
+                let destination = uniqueDestination(for: "\(filename).png", in: directory)
+                await yieldForApplyingStateToPaint()
+                try await WallpaperRenderer.render(design, to: destination)
+                reload()
+                selectedID = "imported.\(destination.lastPathComponent)"
+                if apply, let wallpaper = selectedWallpaper {
+                    await self.apply(wallpaper)
+                } else {
+                    message = "“\(title)” saved to My Wallpapers"
+                }
+            } catch {
+                errorMessage = error.localizedDescription
             }
-        } catch {
-            errorMessage = error.localizedDescription
         }
     }
 
@@ -200,51 +213,69 @@ final class WallpaperStore: ObservableObject {
     }
 
     func applySelected() {
-        guard let wallpaper = selectedWallpaper else { return }
-
-        if case .video(let url) = wallpaper.source {
-            isApplying = true
-            Task {
-                defer { isApplying = false }
-                do {
-                    let choiceID = try await NativeVideoWallpaperService.deploy(url)
-                    do {
-                        try NativeVideoWallpaperService.activate(choiceID: choiceID)
-                        markRecentlyUsed(wallpaper)
-                        message = "“\(wallpaper.title)” is now animating on your Desktop"
-                    } catch {
-                        // The store rewrite is best-effort private API; fall back to
-                        // the manual selection flow instead of failing the apply.
-                        markRecentlyUsed(wallpaper)
-                        NativeVideoWallpaperService.openWallpaperSettings()
-                        message = "Choose “\(wallpaper.title)” in Mural — Video Wallpapers"
-                    }
-                } catch {
-                    errorMessage = error.localizedDescription
-                }
-            }
-            return
-        }
+        guard let wallpaper = selectedWallpaper, !isApplying else { return }
 
         isApplying = true
-        defer { isApplying = false }
+        Task {
+            defer { isApplying = false }
+            await apply(wallpaper)
+        }
+    }
 
+    private func apply(_ wallpaper: Wallpaper) async {
         do {
-            try wallpaperService.apply(wallpaper, to: displayTarget)
-            markRecentlyUsed(wallpaper)
-            message = "“\(wallpaper.title)” is now on your Desktop and Lock Screen"
+            if case .video(let url) = wallpaper.source {
+                try await applyVideo(url, for: wallpaper)
+            } else {
+                await yieldForApplyingStateToPaint()
+                try await wallpaperService.apply(wallpaper, to: displayTarget)
+                markRecentlyUsed(wallpaper)
+                message = "“\(wallpaper.title)” is now on your Desktop and Lock Screen"
+            }
         } catch {
             errorMessage = error.localizedDescription
         }
     }
 
+    private func applyVideo(_ url: URL, for wallpaper: Wallpaper) async throws {
+        let choiceID = try await NativeVideoWallpaperService.deploy(url)
+        do {
+            try await NativeVideoWallpaperService.activate(choiceID: choiceID)
+            markRecentlyUsed(wallpaper)
+            message = "“\(wallpaper.title)” is now animating on your Desktop"
+        } catch {
+            // The store rewrite is best-effort private API; fall back to
+            // the manual selection flow instead of failing the apply.
+            markRecentlyUsed(wallpaper)
+            NativeVideoWallpaperService.openWallpaperSettings()
+            message = "Choose “\(wallpaper.title)” in Mural — Video Wallpapers"
+        }
+    }
+
+    /// ImageRenderer can only run on the main actor, so give SwiftUI one full
+    /// run-loop turn to commit the "Preparing…" state before the render blocks
+    /// the next frames. A plain yield can resume before that commit happens.
+    private func yieldForApplyingStateToPaint() async {
+        try? await Task.sleep(for: .milliseconds(40))
+    }
+
     private func importedWallpapers() -> [Wallpaper] {
-        guard let directory = try? importedDirectory(),
-              let urls = try? fileManager.contentsOfDirectory(
+        let urls: [URL]
+        do {
+            let directory = try importedDirectory()
+            // A missing directory just means nothing was imported yet.
+            guard fileManager.fileExists(atPath: directory.path) else { return [] }
+            urls = try fileManager.contentsOfDirectory(
                 at: directory,
                 includingPropertiesForKeys: [.contentTypeKey],
                 options: [.skipsHiddenFiles]
-              ) else { return [] }
+            )
+        } catch {
+            // An alert at every reload would be noise; a log line is enough to
+            // diagnose a broken Application Support folder.
+            logger.error("Could not read the imported wallpaper library: \(error.localizedDescription, privacy: .public)")
+            return []
+        }
 
         return urls.compactMap { url in
             guard let type = try? url.resourceValues(forKeys: [.contentTypeKey]).contentType,

@@ -114,7 +114,8 @@ enum NativeVideoWallpaperService {
     /// Activates a deployed video by rewriting every Desktop choice in the macOS
     /// wallpaper store to point at it, then restarting WallpaperAgent so the change
     /// takes effect immediately — the same result as picking it in System Settings.
-    static func activate(choiceID: String) throws {
+    /// Async so the plist rewrite and the blocking agent restart stay off the main actor.
+    static func activate(choiceID: String) async throws {
         let directory = videosURL.appendingPathComponent(choiceID, isDirectory: true)
         let metadataURL = directory.appendingPathComponent("metadata.json")
         guard let data = try? Data(contentsOf: metadataURL),
@@ -133,7 +134,7 @@ enum NativeVideoWallpaperService {
 
         let output = try PropertyListSerialization.data(fromPropertyList: root, format: .binary, options: 0)
         try output.write(to: storeURL, options: .atomic)
-        restartWallpaperAgent()
+        try restartWallpaperAgent()
     }
 
     /// Replaces the content of every `Desktop` node with a choice provided by
@@ -184,11 +185,13 @@ enum NativeVideoWallpaperService {
     AQEAAAAAAAAAGAAAAAAAAAAAAAAAAAAAANU=
     """)!
 
-    private static func restartWallpaperAgent() {
+    /// Throws when killall cannot launch: the store was rewritten but the agent
+    /// keeps showing the old choice, so the caller must not report success.
+    private static func restartWallpaperAgent() throws {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/killall")
         process.arguments = ["WallpaperAgent"]
-        try? process.run()
+        try process.run()
         process.waitUntilExit()
     }
 

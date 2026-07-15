@@ -89,27 +89,19 @@ struct StudioPalette: Identifiable, Hashable {
         WallpaperPreset.allCases.map { preset in
             StudioPalette(name: preset.title, colors: preset.colors.map(Color.init))
         } + [
-            StudioPalette(name: "Peach Fuzz", colors: [hex(0xF7E1C8), hex(0xEDA96E), hex(0xC96F4A), hex(0x7A3B2E)]),
-            StudioPalette(name: "Ink Wash", colors: [hex(0xE8E6E1), hex(0xB5B3AC), hex(0x6E6C66), hex(0x2C2B28)]),
-            StudioPalette(name: "Midnight", colors: [hex(0xB8C4E0), hex(0x67729D), hex(0x3A3F63), hex(0x14152B)]),
-            StudioPalette(name: "Meadow", colors: [hex(0xF2EFC7), hex(0xB9CE8B), hex(0x6D9B5B), hex(0x2F5233)]),
-            StudioPalette(name: "Sorbet", colors: [hex(0xF9E0E3), hex(0xF2A6B3), hex(0xD96C8A), hex(0x8C3A56)]),
-            StudioPalette(name: "Glacier", colors: [hex(0xE9F1F2), hex(0xACCBD6), hex(0x6E93A6), hex(0x32506B)]),
-            StudioPalette(name: "Desert Road", colors: [hex(0xF2E3C9), hex(0xD9A566), hex(0xA66038), hex(0x59322B)]),
-            StudioPalette(name: "Neon Dusk", colors: [hex(0xD9BFF2), hex(0x9B72CF), hex(0x5C3D99), hex(0x251A40)]),
-            StudioPalette(name: "Forest Floor", colors: [hex(0xE5E0CF), hex(0xA3B18A), hex(0x588157), hex(0x344E41)]),
-            StudioPalette(name: "Sea Glass", colors: [hex(0xE7F0EA), hex(0x9CC5B0), hex(0x4E8D7C), hex(0x1F4E46)]),
-            StudioPalette(name: "Bubblegum", colors: [hex(0xF7D6E0), hex(0xEFA3C8), hex(0xC566A0), hex(0x71336B)]),
-            StudioPalette(name: "Storm", colors: [hex(0xDFE3E8), hex(0x9FB1C1), hex(0x5A7186), hex(0x2B3A4A)])
+            StudioPalette(name: "Peach Fuzz", colors: [Color(hex: 0xF7E1C8), Color(hex: 0xEDA96E), Color(hex: 0xC96F4A), Color(hex: 0x7A3B2E)]),
+            StudioPalette(name: "Ink Wash", colors: [Color(hex: 0xE8E6E1), Color(hex: 0xB5B3AC), Color(hex: 0x6E6C66), Color(hex: 0x2C2B28)]),
+            StudioPalette(name: "Midnight", colors: [Color(hex: 0xB8C4E0), Color(hex: 0x67729D), Color(hex: 0x3A3F63), Color(hex: 0x14152B)]),
+            StudioPalette(name: "Meadow", colors: [Color(hex: 0xF2EFC7), Color(hex: 0xB9CE8B), Color(hex: 0x6D9B5B), Color(hex: 0x2F5233)]),
+            StudioPalette(name: "Sorbet", colors: [Color(hex: 0xF9E0E3), Color(hex: 0xF2A6B3), Color(hex: 0xD96C8A), Color(hex: 0x8C3A56)]),
+            StudioPalette(name: "Glacier", colors: [Color(hex: 0xE9F1F2), Color(hex: 0xACCBD6), Color(hex: 0x6E93A6), Color(hex: 0x32506B)]),
+            StudioPalette(name: "Desert Road", colors: [Color(hex: 0xF2E3C9), Color(hex: 0xD9A566), Color(hex: 0xA66038), Color(hex: 0x59322B)]),
+            StudioPalette(name: "Neon Dusk", colors: [Color(hex: 0xD9BFF2), Color(hex: 0x9B72CF), Color(hex: 0x5C3D99), Color(hex: 0x251A40)]),
+            StudioPalette(name: "Forest Floor", colors: [Color(hex: 0xE5E0CF), Color(hex: 0xA3B18A), Color(hex: 0x588157), Color(hex: 0x344E41)]),
+            StudioPalette(name: "Sea Glass", colors: [Color(hex: 0xE7F0EA), Color(hex: 0x9CC5B0), Color(hex: 0x4E8D7C), Color(hex: 0x1F4E46)]),
+            StudioPalette(name: "Bubblegum", colors: [Color(hex: 0xF7D6E0), Color(hex: 0xEFA3C8), Color(hex: 0xC566A0), Color(hex: 0x71336B)]),
+            StudioPalette(name: "Storm", colors: [Color(hex: 0xDFE3E8), Color(hex: 0x9FB1C1), Color(hex: 0x5A7186), Color(hex: 0x2B3A4A)])
         ]
-
-    private static func hex(_ value: UInt32) -> Color {
-        Color(
-            red: Double((value >> 16) & 0xff) / 255,
-            green: Double((value >> 8) & 0xff) / 255,
-            blue: Double(value & 0xff) / 255
-        )
-    }
 }
 
 /// A wallpaper the user is sketching in Mural Studio.

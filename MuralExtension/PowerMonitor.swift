@@ -13,9 +13,6 @@ final class PowerMonitor: Sendable {
         var thermalState: ProcessInfo.ThermalState = .nominal
         var isOnBattery = false
         var batteryLevel: Int = 100
-        // TODO: Detect via Darwin notification (e.g. "com.apple.GameMode.active")
-        // if one can be discovered. Sandboxed extensions may not receive it.
-        var isGameModeActive: Bool = false
         /// Backlight brightness of the built-in display, 0.0–1.0. Defaults to 1.0
         /// when the value can't be read (external displays, headless, etc.).
         var displayBrightness: Float = 1.0

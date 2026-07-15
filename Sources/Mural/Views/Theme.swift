@@ -1,6 +1,28 @@
 import AppKit
 import CoreText
+import os
 import SwiftUI
+
+// MARK: - Hex colors
+
+extension NSColor {
+    /// An opaque sRGB color from a 0xRRGGBB literal.
+    convenience init(hex: UInt32) {
+        self.init(
+            srgbRed: CGFloat((hex >> 16) & 0xff) / 255,
+            green: CGFloat((hex >> 8) & 0xff) / 255,
+            blue: CGFloat(hex & 0xff) / 255,
+            alpha: 1
+        )
+    }
+}
+
+extension Color {
+    /// An opaque sRGB color from a 0xRRGGBB literal.
+    init(hex: UInt32) {
+        self.init(nsColor: NSColor(hex: hex))
+    }
+}
 
 // MARK: - Palette
 
@@ -22,17 +44,8 @@ enum Paper {
     private static func dynamic(light: UInt32, dark: UInt32) -> Color {
         Color(nsColor: NSColor(name: nil) { appearance in
             let isDark = appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
-            return nsColor(hex: isDark ? dark : light)
+            return NSColor(hex: isDark ? dark : light)
         })
-    }
-
-    private static func nsColor(hex: UInt32) -> NSColor {
-        NSColor(
-            srgbRed: CGFloat((hex >> 16) & 0xff) / 255,
-            green: CGFloat((hex >> 8) & 0xff) / 255,
-            blue: CGFloat(hex & 0xff) / 255,
-            alpha: 1
-        )
     }
 }
 
@@ -41,10 +54,21 @@ enum Paper {
 enum VirgilFont {
     static let family = "Virgil 3 YOFF"
 
+    private static let logger = Logger(subsystem: "local.mural.wallpapers", category: "fonts")
+
     /// Registers the bundled Excalidraw handwriting face for this process.
+    /// Failures aren't fatal — text falls back to the system font — but they
+    /// are logged so a broken bundle doesn't degrade the UI silently.
     static func register() {
-        guard let url = ResourceLocator.url(forResource: "Virgil", withExtension: "ttf") else { return }
-        CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
+        guard let url = ResourceLocator.url(forResource: "Virgil", withExtension: "ttf") else {
+            logger.error("Virgil.ttf is missing from the app bundle; falling back to the system font.")
+            return
+        }
+        var registrationError: Unmanaged<CFError>?
+        if unsafe !CTFontManagerRegisterFontsForURL(url as CFURL, .process, &registrationError) {
+            let reason = unsafe registrationError?.takeRetainedValue().localizedDescription ?? "unknown error"
+            logger.error("Could not register Virgil: \(reason, privacy: .public)")
+        }
     }
 }
 

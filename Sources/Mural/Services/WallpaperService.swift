@@ -4,6 +4,7 @@ import Foundation
 enum WallpaperError: LocalizedError {
     case renderFailed
     case missingResource(String)
+    case videoUnsupported
     case noDisplay
 
     var errorDescription: String? {
@@ -12,6 +13,8 @@ enum WallpaperError: LocalizedError {
             "Mural couldn’t render this wallpaper."
         case .missingResource(let name):
             "The bundled wallpaper “\(name)” is missing."
+        case .videoUnsupported:
+            "Video wallpapers can’t be applied as a still desktop image."
         case .noDisplay:
             "Mural couldn’t find a connected display."
         }
@@ -23,8 +26,8 @@ final class WallpaperService {
     private let workspace = NSWorkspace.shared
     private let fileManager = FileManager.default
 
-    func apply(_ wallpaper: Wallpaper, to target: DisplayTarget) throws {
-        let url = try resolvedURL(for: wallpaper)
+    func apply(_ wallpaper: Wallpaper, to target: DisplayTarget) async throws {
+        let url = try await resolvedURL(for: wallpaper)
         let screens: [NSScreen]
 
         switch target {
@@ -46,20 +49,22 @@ final class WallpaperService {
         }
     }
 
-    private func resolvedURL(for wallpaper: Wallpaper) throws -> URL {
+    private func resolvedURL(for wallpaper: Wallpaper) async throws -> URL {
         switch wallpaper.source {
         case .bundled(let url):
             return url
         case .imported(let url):
             return url
         case .video:
-            throw WallpaperError.missingResource("Video wallpapers are handled by WallpaperAgent")
+            // Videos go through NativeVideoWallpaperService; reaching this
+            // path means a caller skipped that branch.
+            throw WallpaperError.videoUnsupported
         case .procedural(let preset):
             let url = try applicationSupportDirectory()
                 .appendingPathComponent("Rendered", isDirectory: true)
                 .appendingPathComponent("\(preset.rawValue).png")
             if !fileManager.fileExists(atPath: url.path) {
-                try WallpaperRenderer.render(preset, to: url)
+                try await WallpaperRenderer.render(preset, to: url)
             }
             return url
         }

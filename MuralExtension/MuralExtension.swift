@@ -73,7 +73,6 @@ final class MuralExtension: NSObject, AppExtension {
             forName: NSWorkspace.screensDidSleepNotification,
             object: nil, queue: .main,
         ) { _ in
-            WallpaperState.shared.isDisplayAsleep = true
             WallpaperState.shared.forEachRenderer { renderer in
                 renderer.applyPolicy(.paused)
             }
@@ -83,7 +82,6 @@ final class MuralExtension: NSObject, AppExtension {
             forName: NSWorkspace.screensDidWakeNotification,
             object: nil, queue: .main,
         ) { _ in
-            WallpaperState.shared.isDisplayAsleep = false
             Self.recomputeAndApplyPolicy()
             extensionLog("[Extension] Displays awake — recomputed policy (locked: \(WallpaperState.shared.isScreenLocked))")
 
