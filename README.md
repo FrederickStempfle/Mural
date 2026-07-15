@@ -107,15 +107,9 @@ When nothing in the box fits, sketch your own. Mural Studio is a small wallpaper
 Then comes the fun part: scrapbook stickers. Taped paper notes, washi tape, a polaroid frame, a vintage postage stamp, and hand-drawn doodles — drag them anywhere, resize, rotate, layer. Everything renders locally at 2880×1800 and lands in My Wallpapers, one click away from your desktop.
 
 <p align="center">
-  <img src="docs/studio-collage.png" alt="A studio wallpaper: dunes backdrop decorated with a taped polaroid, postage stamp, and paper-note stickers" width="88%" />
+  <img src="Sources/Mural/Resources/PreMadeWallpapers/Amalfi%20Reverie.png" alt="Amalfi Reverie as a studio photo backdrop" width="88%" />
   <br />
-  <sub><em>A Dunes backdrop, decorated in the studio.</em></sub>
-</p>
-
-<p align="center">
-  <img src="Sources/Mural/Resources/PreMadeWallpapers/Amalfi%20Reverie.png" alt="Amalfi Reverie, a photo backdrop ready for the studio" width="88%" />
-  <br />
-  <sub><em>Photos make backdrops too — start from a picture like Amalfi Reverie and decorate from there.</em></sub>
+  <sub><em>Amalfi Reverie as a photo backdrop.</em></sub>
 </p>
 
 <p align="center">
