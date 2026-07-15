@@ -1,0 +1,12 @@
+# macOS metadata
+.DS_Store
+
+# Swift Package Manager and Xcode build products
+.build/
+dist/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+
+# SwiftPM workspace metadata
+.swiftpm/xcode/package.xcworkspace/xcuserdata/
