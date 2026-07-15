@@ -113,6 +113,12 @@ Then comes the fun part: scrapbook stickers. Taped paper notes, washi tape, a po
 </p>
 
 <p align="center">
+  <img src="Sources/Mural/Resources/PreMadeWallpapers/Amalfi%20Reverie.png" alt="Amalfi Reverie, a photo backdrop ready for the studio" width="88%" />
+  <br />
+  <sub><em>Photos make backdrops too — start from a picture like Amalfi Reverie and decorate from there.</em></sub>
+</p>
+
+<p align="center">
   <img src="docs/studio-styles.png" alt="The twelve studio backdrop styles, each rendered in a different palette" width="88%" />
   <br />
   <sub><em>All twelve backdrop styles, each wearing a different palette.</em></sub>
