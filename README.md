@@ -24,8 +24,6 @@
 <p align="center">
   <a href="#the-gallery">The gallery</a>
   &nbsp;·&nbsp;
-  <a href="#make-your-desktop-a-mural">What it does</a>
-  &nbsp;·&nbsp;
   <a href="#run-it">Run it</a>
   &nbsp;·&nbsp;
   <a href="#animated-wallpapers">Animated wallpapers</a>
@@ -41,17 +39,17 @@
 
 There are plenty of places to *find* a wallpaper. But a free, native macOS app that lets you collect your own art, use beautiful stills, and set animated video backgrounds? That space is surprisingly empty.
 
-**Mural fills it.** It is a personal wallpaper library for macOS — quiet, tactile, and made for keeping the images and moving scenes that make a screen feel like yours.
+**Mural fills it.** It is a personal wallpaper library for macOS: quiet, tactile, and made for keeping the images and moving scenes that make a screen feel like yours.
 
 <p align="center">
-  <img src="Sources/Mural/Resources/PreMadeWallpapers/Platform%20Sunset.png" alt="Platform Sunset, one of Mural's bundled wallpapers" width="88%" />
+  <img src="Sources/Mural/Resources/PreMadeWallpapers/Make%20It%20Happen.png" alt="Make It Happen, one of Mural's bundled wallpapers" width="88%" />
   <br />
-  <sub><em>Platform Sunset — one of Mural's bundled wallpapers.</em></sub>
+  <sub><em>Make It Happen, one of Mural's bundled wallpapers.</em></sub>
 </p>
 
 ## The gallery
 
-Mural ships with a hand-picked starter collection — eighteen stills spanning woodblock prints, anime skylines, neon nights, and quiet mornings — plus five procedural wallpapers rendered locally at 2880×1800 the moment you choose them.
+Mural ships with a hand-picked starter collection of eighteen stills spanning woodblock prints, anime skylines, neon nights, and quiet mornings, plus five procedural wallpapers rendered locally at 2880×1800 the moment you choose them.
 
 <table>
   <tr>
@@ -100,18 +98,9 @@ Mural ships with a hand-picked starter collection — eighteen stills spanning w
 
 <p align="center"><sub><em>…and nine more waiting in the box.</em></sub></p>
 
-## Make your desktop a Mural
-
-| | |
-|:--|:--|
-| 🖼️ &nbsp;**Keep a real library** | Import local images and videos, keep favourites close, and revisit recently used wallpapers. |
-| 🖥️ &nbsp;**Set the scene** | Apply a wallpaper to every display or only your main display. |
-| 🎞️ &nbsp;**Let it move** | On supported macOS releases, use videos as native animated wallpapers on the Desktop and Lock Screen — even after Mural is closed. |
-| 🌅 &nbsp;**Start somewhere lovely** | A hand-picked starter collection and five procedural wallpapers are included, ready the moment you open the app. |
-
 ## Made to feel like a little gallery
 
-Mural is built with SwiftUI for macOS. No web wrapper, no account, no wallpaper storefront — just a small library that gives your desktop the attention it deserves.
+Mural is built with SwiftUI for macOS. No web wrapper, no account, no wallpaper storefront. Just a small library that gives your desktop the attention it deserves. Import local images and videos, keep favourites close, revisit recently used wallpapers, and apply them to every display or only your main one.
 
 > Bring your own collection, make a few favourites, and let the background be more than an afterthought.
 
@@ -136,7 +125,7 @@ The build script creates an ad-hoc signed `dist/Mural.app` containing the Mural 
 
 Native video wallpaper support requires **macOS 26 and Xcode 26**. Mural uses Apple's private `WallpaperExtensionKit` integration: `WallpaperAgent` keeps playback running on the Desktop and Lock Screen after the app closes, across displays and Spaces.
 
-If macOS cannot apply the video automatically, Mural opens the **Mural — Video Wallpapers** collection in System Settings so you can select it there. When a video is removed from Mural, its deployed system copy is retained while macOS still uses it — so an active wallpaper never loses its media.
+If macOS cannot apply the video automatically, Mural opens the **Mural — Video Wallpapers** collection in System Settings so you can select it there. When a video is removed from Mural, its deployed system copy is retained while macOS still uses it, so an active wallpaper never loses its media.
 
 ## The small print
 
