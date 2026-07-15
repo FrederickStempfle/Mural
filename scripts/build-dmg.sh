@@ -80,6 +80,9 @@ tell application "Finder"
 end tell
 EOF
 
+# Keep DMG support files out of the install view. Finder can otherwise expose
+# them as stray folders when it opens the mounted image.
+SetFile -a V /Volumes/Mural/.background /Volumes/Mural/.fseventsd /Volumes/Mural/.DS_Store 2> /dev/null || true
 SetFile -a C /Volumes/Mural 2> /dev/null || true
 sync
 hdiutil detach /Volumes/Mural > /dev/null

@@ -25,6 +25,29 @@ import Testing
     #expect(data.count > 100_000)
 }
 
+@Test func curatedPalettesHaveFourColorsAndUniqueNames() {
+    for palette in StudioPalette.curated {
+        #expect(palette.colors.count == 4)
+    }
+    #expect(Set(StudioPalette.curated.map(\.name)).count == StudioPalette.curated.count)
+}
+
+@Test @MainActor func everyStudioStyleRendersAsPNG() throws {
+    let directory = FileManager.default.temporaryDirectory
+        .appendingPathComponent(UUID().uuidString, isDirectory: true)
+    defer { try? FileManager.default.removeItem(at: directory) }
+
+    for style in StudioStyle.allCases {
+        let design = StudioDesign(backdrop: .style(style), colors: StudioPalette.curated[0].colors, seed: 0.5)
+        let url = directory.appendingPathComponent("\(style.rawValue).png")
+        try WallpaperRenderer.render(design, to: url)
+
+        let data = try Data(contentsOf: url)
+        #expect(data.starts(with: [0x89, 0x50, 0x4e, 0x47]))
+        #expect(data.count > 100_000)
+    }
+}
+
 @Test func rewritesEveryDesktopChoiceAndLeavesIdleAlone() throws {
     let idleContent: [String: Any] = [
         "Choices": [["Provider": "com.apple.NeptuneOneExtension", "Configuration": Data(), "Files": [Any]()]],

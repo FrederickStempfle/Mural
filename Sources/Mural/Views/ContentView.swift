@@ -14,17 +14,22 @@ struct ContentView: View {
                 .frame(width: 3)
                 .ignoresSafeArea()
 
-            LibraryView(store: store)
-                .frame(maxWidth: .infinity)
+            if store.selectedFilter == .studio {
+                StudioView(store: store)
+                    .frame(maxWidth: .infinity)
+            } else {
+                LibraryView(store: store)
+                    .frame(maxWidth: .infinity)
 
-            SketchyLine(seed: 6.1)
-                .stroke(Paper.inkHairline, lineWidth: 1.2)
-                .frame(width: 3)
-                .ignoresSafeArea()
+                SketchyLine(seed: 6.1)
+                    .stroke(Paper.inkHairline, lineWidth: 1.2)
+                    .frame(width: 3)
+                    .ignoresSafeArea()
 
-            InspectorView(store: store)
-                .frame(width: 332)
-                .background(Paper.raised.ignoresSafeArea())
+                InspectorView(store: store)
+                    .frame(width: 332)
+                    .background(Paper.raised.ignoresSafeArea())
+            }
         }
         .background(Paper.base.ignoresSafeArea())
         .frame(minWidth: 1060, minHeight: 660)

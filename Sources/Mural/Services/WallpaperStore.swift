@@ -37,6 +37,7 @@ final class WallpaperStore: ObservableObject {
             case .all: matchesFilter = true
             case .builtIn: matchesFilter = !wallpaper.isImported
             case .imported: matchesFilter = wallpaper.isImported
+            case .studio: matchesFilter = false
             case .favorites: matchesFilter = favoriteIDs.contains(wallpaper.id)
             case .recent: matchesFilter = recentIDs.contains(wallpaper.id)
             }
@@ -57,9 +58,7 @@ final class WallpaperStore: ObservableObject {
     }
 
     func reload() {
-        var items = [
-            Wallpaper(id: "studio.paper-sun", title: "Paper Sun", collection: "Mural Studio", source: .bundled(resource: "PaperSun"))
-        ]
+        var items = bundledWallpapers()
         items.append(contentsOf: WallpaperPreset.allCases.map {
             Wallpaper(id: "studio.\($0.rawValue)", title: $0.title, collection: $0.collection, source: .procedural($0))
         })
@@ -69,6 +68,25 @@ final class WallpaperStore: ObservableObject {
         if selectedID == nil || !items.contains(where: { $0.id == selectedID }) {
             selectedID = items.first?.id
         }
+    }
+
+    private func bundledWallpapers() -> [Wallpaper] {
+        var wallpapers: [Wallpaper] = []
+
+        wallpapers.append(contentsOf: ResourceLocator.preMadeWallpaperURLs().map { url in
+            let filename = url.deletingPathExtension().lastPathComponent
+            return Wallpaper(
+                id: "studio.file.\(filename)",
+                title: filename
+                    .replacingOccurrences(of: "-", with: " ")
+                    .replacingOccurrences(of: "_", with: " ")
+                    .localizedCapitalized,
+                collection: "Mural Studio",
+                source: .bundled(url)
+            )
+        })
+
+        return wallpapers
     }
 
     func toggleFavorite(_ wallpaper: Wallpaper) {
@@ -125,6 +143,31 @@ final class WallpaperStore: ObservableObject {
                         errorMessage = error.localizedDescription
                     }
                 }
+            }
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    /// Renders a studio design into the imported library so it behaves like
+    /// any other wallpaper the user added, then optionally applies it.
+    func saveStudioDesign(_ design: StudioDesign, named proposedName: String, apply: Bool = false) {
+        let trimmed = proposedName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let title = trimmed.isEmpty ? design.suggestedName : trimmed
+        do {
+            let directory = try importedDirectory()
+            try fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
+            let filename = title
+                .replacingOccurrences(of: "/", with: "-")
+                .replacingOccurrences(of: ":", with: "-")
+            let destination = uniqueDestination(for: "\(filename).png", in: directory)
+            try WallpaperRenderer.render(design, to: destination)
+            reload()
+            selectedID = "imported.\(destination.lastPathComponent)"
+            if apply {
+                applySelected()
+            } else {
+                message = "“\(title)” saved to My Wallpapers"
             }
         } catch {
             errorMessage = error.localizedDescription

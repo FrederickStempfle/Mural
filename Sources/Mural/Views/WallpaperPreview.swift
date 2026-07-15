@@ -10,9 +10,8 @@ struct WallpaperPreview: View {
             switch wallpaper.source {
             case .procedural(let preset):
                 WallpaperArtwork(preset: preset)
-            case .bundled(let resource):
-                if let url = ResourceLocator.url(forResource: resource, withExtension: "png"),
-                   let image = NSImage(contentsOf: url) {
+            case .bundled(let url):
+                if let image = NSImage(contentsOf: url) {
                     Image(nsImage: image)
                         .resizable()
                         .scaledToFill()

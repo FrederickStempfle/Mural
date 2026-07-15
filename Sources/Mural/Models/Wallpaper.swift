@@ -2,7 +2,7 @@ import AppKit
 import Foundation
 
 enum WallpaperSource: Hashable {
-    case bundled(resource: String)
+    case bundled(URL)
     case procedural(WallpaperPreset)
     case imported(URL)
     case video(URL)
@@ -82,8 +82,9 @@ enum WallpaperPreset: String, CaseIterable, Hashable, Codable {
 
 enum LibraryFilter: String, CaseIterable, Identifiable {
     case all = "All Wallpapers"
-    case builtIn = "Mural Studio"
+    case builtIn = "Curated"
     case imported = "My Wallpapers"
+    case studio = "Mural Studio"
     case favorites = "Favorites"
     case recent = "Recently Used"
 
@@ -92,8 +93,9 @@ enum LibraryFilter: String, CaseIterable, Identifiable {
     var symbol: String {
         switch self {
         case .all: "rectangle.grid.2x2"
-        case .builtIn: "paintbrush"
+        case .builtIn: "photo.stack"
         case .imported: "photo.on.rectangle.angled"
+        case .studio: "paintbrush"
         case .favorites: "heart"
         case .recent: "clock.arrow.circlepath"
         }

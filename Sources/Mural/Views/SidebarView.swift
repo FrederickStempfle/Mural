@@ -12,6 +12,8 @@ struct SidebarView: View {
                 .frame(maxWidth: .infinity)
 
             section("Library", filters: [.all, .builtIn, .imported])
+            section("Create", filters: [.studio])
+                .padding(.top, 22)
             section("Personal", filters: [.favorites, .recent])
                 .padding(.top, 22)
 

@@ -4,8 +4,12 @@ import SwiftUI
 @MainActor
 enum WallpaperRenderer {
     static func render(_ preset: WallpaperPreset, to destination: URL) throws {
+        try render(StudioDesign(preset: preset), to: destination)
+    }
+
+    static func render(_ design: StudioDesign, to destination: URL) throws {
         let size = CGSize(width: 2880, height: 1800)
-        let renderer = ImageRenderer(content: WallpaperArtwork(preset: preset).frame(width: size.width, height: size.height))
+        let renderer = ImageRenderer(content: StudioCanvas(design: design).frame(width: size.width, height: size.height))
         renderer.proposedSize = ProposedViewSize(size)
         renderer.scale = 1
 

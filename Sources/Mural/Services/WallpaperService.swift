@@ -48,10 +48,7 @@ final class WallpaperService {
 
     private func resolvedURL(for wallpaper: Wallpaper) throws -> URL {
         switch wallpaper.source {
-        case .bundled(let resource):
-            guard let url = ResourceLocator.url(forResource: resource, withExtension: "png") else {
-                throw WallpaperError.missingResource(resource)
-            }
+        case .bundled(let url):
             return url
         case .imported(let url):
             return url
