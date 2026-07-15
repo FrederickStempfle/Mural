@@ -102,7 +102,7 @@ Mural ships with a hand-picked starter collection of eighteen stills spanning wo
 
 ## Mural Studio
 
-When nothing in the box fits, sketch your own. Mural Studio is a small wallpaper workshop built into the sidebar: pick one of twelve drawn backdrop styles — dunes, aurora, plaid, moonrise, and friends — or start from a photo of your own, then tune it with seventeen curated palettes, free-form colors, and a variation dice until it feels right.
+When nothing in the box fits, sketch your own. Mural Studio is a small wallpaper workshop built into the sidebar: pick one of twelve drawn backdrop styles: dunes, aurora, plaid, moonrise, and friends, or start from a photo of your own, then tune it with seventeen curated palettes, free-form colors, and a variation dice until it feels right.
 
 Then comes the fun part: scrapbook stickers. Taped paper notes, washi tape, a polaroid frame, a vintage postage stamp, and hand-drawn doodles — drag them anywhere, resize, rotate, layer. Everything renders locally at 2880×1800 and lands in My Wallpapers, one click away from your desktop.
 
