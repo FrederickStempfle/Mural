@@ -1,28 +1,72 @@
-# Mural
+<p align="center">
+  <img src="Packaging/DMGBackground.png" alt="Mural — a hand-drawn home for your desktop" width="100%" />
+</p>
 
-Mural is a native macOS wallpaper library built with SwiftUI. It applies images through `NSWorkspace.setDesktopImageURL`, supports all displays or the main display, imports local images and videos into a persistent library, and includes favorites and recent history.
+<h1 align="center">Mural</h1>
 
-The starter library contains one original generated paper-collage wallpaper and five lightweight procedural wallpapers rendered locally at 2880×1800 when selected.
+<p align="center">
+  <strong>A free, native home for the backgrounds you actually want to live with.</strong><br />
+  Still art. Moving scenes. Your Mac, made personal.
+</p>
 
-For videos on macOS 26, Mural embeds a native wallpaper extension backed by Apple's private `WallpaperExtensionKit`. WallpaperAgent hosts playback on the Desktop and Lock Screen, including when Mural is closed. Applying a video sets it automatically across all displays and Spaces: Mural rewrites the Desktop choices in the macOS wallpaper store (`com.apple.wallpaper/Store/Index.plist`) and restarts WallpaperAgent. If that rewrite ever fails, Mural falls back to opening the **Mural — Video Wallpapers** collection in System Settings for manual selection.
+<p align="center">
+  <a href="#make-your-desktop-a-mural">What it does</a> ·
+  <a href="#run-it">Run it</a> ·
+  <a href="#the-small-print">The small print</a>
+</p>
 
-Removing a video from Mural keeps its deployed system copy whenever macOS still references that wallpaper, preventing an active Desktop or Lock Screen choice from losing its media file.
+---
 
-This private integration may break after a macOS update and is not suitable for Mac App Store distribution. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+## Your desktop has been standing still for too long.
 
-## Run
+There are plenty of places to *find* a wallpaper. But a free, native macOS app that lets you collect your own art, use beautiful stills, and set animated video backgrounds? That space is surprisingly empty.
 
-The static Swift Package target requires macOS 14 or later. Native video wallpapers require macOS 26 and Xcode 26.
+**Mural fills it.** It is a personal wallpaper library for macOS—quiet, tactile, and made for keeping the images and moving scenes that make a screen feel like yours.
+
+<p align="center">
+  <img src="Sources/Mural/Resources/PaperSun.png" alt="Paper Sun, an original Mural wallpaper" width="82%" />
+  <br />
+  <em>Paper Sun — one of Mural’s original starter wallpapers.</em>
+</p>
+
+## Make your desktop a Mural
+
+| | |
+|:--|:--|
+| **Keep a real library** | Import local images and videos, keep favourites close, and revisit recently used wallpapers. |
+| **Set the scene** | Apply a wallpaper to every display or only your main display. |
+| **Let it move** | On supported macOS releases, use videos as native animated wallpapers on the Desktop and Lock Screen—even after Mural is closed. |
+| **Start somewhere lovely** | Mural includes Paper Sun and five procedural wallpapers, rendered locally at 2880×1800 when you choose them. |
+
+## Made to feel like a little gallery
+
+Mural is built with SwiftUI for macOS. No web wrapper, no account, no wallpaper storefront—just a small library that gives your desktop the attention it deserves.
+
+> Bring your own collection, make a few favourites, and let the background be more than an afterthought.
+
+## Run it
+
+Mural’s static wallpaper library requires **macOS 14 or later**.
 
 ```sh
 swift run Mural
 ```
 
-## Build the complete app bundle
+### Build the complete app
 
 ```sh
 ./scripts/build-app.sh
 open dist/Mural.app
 ```
 
-The build script creates an ad-hoc signed `dist/Mural.app` containing `MuralExtension.appex`. For distribution, replace ad-hoc signing with your Developer ID and notarization workflow.
+The build script creates an ad-hoc signed `dist/Mural.app` containing the Mural wallpaper extension.
+
+## Animated wallpapers
+
+Native video wallpaper support requires **macOS 26 and Xcode 26**. Mural uses Apple’s private `WallpaperExtensionKit` integration: `WallpaperAgent` keeps playback running on the Desktop and Lock Screen after the app closes, across displays and Spaces.
+
+If macOS cannot apply the video automatically, Mural opens the **Mural — Video Wallpapers** collection in System Settings so you can select it there. When a video is removed from Mural, its deployed system copy is retained while macOS still uses it—so an active wallpaper never loses its media.
+
+## The small print
+
+The video-wallpaper integration depends on private Apple frameworks. It may break after a macOS update and is not suitable for Mac App Store distribution. For bundled artwork and font notices, see [Third-party notices](THIRD_PARTY_NOTICES.md).
