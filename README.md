@@ -24,6 +24,8 @@
 <p align="center">
   <a href="#the-gallery">The gallery</a>
   &nbsp;·&nbsp;
+  <a href="#mural-studio">Mural Studio</a>
+  &nbsp;·&nbsp;
   <a href="#run-it">Run it</a>
   &nbsp;·&nbsp;
   <a href="#animated-wallpapers">Animated wallpapers</a>
@@ -98,6 +100,24 @@ Mural ships with a hand-picked starter collection of eighteen stills spanning wo
 
 <p align="center"><sub><em>…and nine more waiting in the box.</em></sub></p>
 
+## Mural Studio
+
+When nothing in the box fits, sketch your own. Mural Studio is a small wallpaper workshop built into the sidebar: pick one of twelve drawn backdrop styles — dunes, aurora, plaid, moonrise, and friends — or start from a photo of your own, then tune it with seventeen curated palettes, free-form colors, and a variation dice until it feels right.
+
+Then comes the fun part: scrapbook stickers. Taped paper notes, washi tape, a polaroid frame, a vintage postage stamp, and hand-drawn doodles — drag them anywhere, resize, rotate, layer. Everything renders locally at 2880×1800 and lands in My Wallpapers, one click away from your desktop.
+
+<p align="center">
+  <img src="docs/studio-collage.png" alt="A studio wallpaper: dunes backdrop decorated with a taped polaroid, postage stamp, and paper-note stickers" width="88%" />
+  <br />
+  <sub><em>A Dunes backdrop, decorated in the studio.</em></sub>
+</p>
+
+<p align="center">
+  <img src="docs/studio-styles.png" alt="The twelve studio backdrop styles, each rendered in a different palette" width="88%" />
+  <br />
+  <sub><em>All twelve backdrop styles, each wearing a different palette.</em></sub>
+</p>
+
 ## Made to feel like a little gallery
 
 Mural is built with SwiftUI for macOS. No web wrapper, no account, no wallpaper storefront. Just a small library that gives your desktop the attention it deserves. Import local images and videos, keep favourites close, revisit recently used wallpapers, and apply them to every display or only your main one.
@@ -119,7 +139,7 @@ swift run Mural
 open dist/Mural.app
 ```
 
-The build script creates an ad-hoc signed `dist/Mural.app` containing the Mural wallpaper extension.
+The build script creates an ad-hoc signed `dist/Mural.app` containing the Mural wallpaper extension. To package it as an installer, run `./scripts/build-dmg.sh`, which produces `dist/Mural.dmg`.
 
 ## Animated wallpapers
 
