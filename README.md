@@ -35,11 +35,11 @@
 
 ---
 
-## Your desktop has been standing still for too long.
+## Why Mural exists
 
-There are plenty of places to *find* a wallpaper. But a free, native macOS app that lets you collect your own art, use beautiful stills, and set animated video backgrounds? That space is surprisingly empty.
+There is no good home for wallpapers on a Mac. System Settings buries them, and most wallpaper apps are paid, web-wrapped, or full of stock art you will never use.
 
-**Mural fills it.** It is a personal wallpaper library for macOS: quiet, tactile, and made for keeping the images and moving scenes that make a screen feel like yours.
+Mural is a small native app with one job: keep the wallpapers you actually like, still or moving, and put them on your screen.
 
 <p align="center">
   <img src="Sources/Mural/Resources/PreMadeWallpapers/Make%20It%20Happen.png" alt="Make It Happen, one of Mural's bundled wallpapers" width="88%" />
