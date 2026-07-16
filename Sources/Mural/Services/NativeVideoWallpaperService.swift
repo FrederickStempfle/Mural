@@ -1,6 +1,7 @@
 import AppKit
 import AVFoundation
 import Foundation
+import MuralKit
 
 enum NativeVideoWallpaperError: LocalizedError {
     case noVideoTrack
@@ -21,28 +22,14 @@ enum NativeVideoWallpaperError: LocalizedError {
 /// Deploys video files into the sandbox owned by Mural's WallpaperExtensionKit extension.
 /// WallpaperAgent hosts that extension and drives it on the Desktop and Lock Screen.
 enum NativeVideoWallpaperService {
-    private struct Metadata: Codable {
-        let id: String
-        var name: String
-        var filename: String
-        var duration: Double
-        var fps: Double
-        var resolution: CGSize
-        var dateAdded: Date
-        var variants: [VideoVariant]?
-    }
+    private static let notification = MuralIdentifiers.libraryChangedNotification
 
-    private struct VideoVariant: Codable {
-        let filename: String
-        let fps: Int
-        let resolution: CGSize
-    }
-
-    private static let notification = "local.mural.wallpapers.libraryChanged"
-
+    /// The extension's sandbox container. Inside the extension this same
+    /// directory is reached as `~/Documents` — the sandbox redirects its home,
+    /// so `VideoLibrary` spells the path differently for the identical location.
     private static var documentsURL: URL {
         FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent("Library/Containers/local.mural.wallpapers.extension/Data/Documents")
+            .appendingPathComponent("Library/Containers/\(MuralIdentifiers.extensionBundleID)/Data/Documents")
     }
 
     private static var videosURL: URL {
@@ -72,7 +59,7 @@ enum NativeVideoWallpaperService {
             let naturalSize = try await track.load(.naturalSize)
             let duration = try await asset.load(.duration)
 
-            let metadata = Metadata(
+            let metadata = VideoEntry(
                 id: id,
                 name: sourceURL.deletingPathExtension().lastPathComponent,
                 filename: destination.lastPathComponent,
@@ -119,7 +106,7 @@ enum NativeVideoWallpaperService {
         let directory = videosURL.appendingPathComponent(choiceID, isDirectory: true)
         let metadataURL = directory.appendingPathComponent("metadata.json")
         guard let data = try? Data(contentsOf: metadataURL),
-              let metadata = try? JSONDecoder().decode(Metadata.self, from: data) else {
+              let metadata = try? JSONDecoder().decode(VideoEntry.self, from: data) else {
             throw NativeVideoWallpaperError.deployedCopyMissing
         }
         let videoURL = directory.appendingPathComponent(metadata.filename)
@@ -153,7 +140,7 @@ enum NativeVideoWallpaperService {
                         [
                             "Configuration": Data(choiceID.utf8),
                             "Files": [["relative": videoURL.absoluteString]],
-                            "Provider": extensionBundleID
+                            "Provider": MuralIdentifiers.extensionBundleID
                         ]
                     ],
                     "EncodedOptionValues": videoOptionValues,
@@ -168,8 +155,6 @@ enum NativeVideoWallpaperService {
         }
         return result
     }
-
-    private static let extensionBundleID = "local.mural.wallpapers.extension"
 
     private static var wallpaperStoreURL: URL {
         FileManager.default.homeDirectoryForCurrentUser
@@ -203,7 +188,7 @@ enum NativeVideoWallpaperService {
         }
     }
 
-    private static func existingMetadata(filename: String) -> Metadata? {
+    private static func existingMetadata(filename: String) -> VideoEntry? {
         let fileManager = FileManager.default
         guard let directories = try? fileManager.contentsOfDirectory(
             at: videosURL,
@@ -214,7 +199,7 @@ enum NativeVideoWallpaperService {
         for directory in directories {
             let url = directory.appendingPathComponent("metadata.json")
             guard let data = try? Data(contentsOf: url),
-                  let metadata = try? JSONDecoder().decode(Metadata.self, from: data) else { continue }
+                  let metadata = try? JSONDecoder().decode(VideoEntry.self, from: data) else { continue }
             if metadata.filename == filename { return metadata }
         }
         return nil

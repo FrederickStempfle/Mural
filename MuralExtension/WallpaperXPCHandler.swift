@@ -1,6 +1,7 @@
 import AppKit
 import AVFoundation
 import CoreMedia
+import MuralKit
 import os
 import QuartzCore
 

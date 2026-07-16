@@ -2,13 +2,13 @@ import Foundation
 
 /// Central decision-maker for wallpaper playback behavior.
 /// Replaces scattered shouldPause boolean checks with a graduated policy system.
-enum PlaybackPolicy: Int, Comparable {
+public enum PlaybackPolicy: Int, Comparable, Sendable {
     case full = 0
     case reduced = 1
     case minimal = 2
     case paused = 3
 
-    static func < (lhs: PlaybackPolicy, rhs: PlaybackPolicy) -> Bool {
+    public static func < (lhs: PlaybackPolicy, rhs: PlaybackPolicy) -> Bool {
         lhs.rawValue < rhs.rawValue
     }
 
@@ -18,7 +18,7 @@ enum PlaybackPolicy: Int, Comparable {
     /// On the desktop (unlocked), it pauses with a ramp animation.
     ///
     /// Lock screen never reduces FPS by itself — only power/thermal conditions do.
-    static func compute(
+    public static func compute(
         presentationMode: String,
         activityState: String,
         userPaused: Bool,
@@ -41,7 +41,7 @@ enum PlaybackPolicy: Int, Comparable {
         // User dimmed the backlight to ~zero. The display is technically still
         // "awake" so `screensDidSleep` doesn't fire and the WallpaperAgent never
         // switches to "idle", but the user can't see any of it.
-        if displayBrightness < PowerMonitor.PowerState.brightnessPauseThreshold {
+        if displayBrightness < PowerState.brightnessPauseThreshold {
             worst = max(worst, .paused)
         }
         // Desktop occlusion is irrelevant on the lock screen — the wallpaper
@@ -60,15 +60,15 @@ enum PlaybackPolicy: Int, Comparable {
         return worst
     }
 
-    /// Convenience overload that unpacks a `PowerMonitor.PowerState`.
-    static func compute(
+    /// Convenience overload that unpacks a `PowerState`.
+    public static func compute(
         presentationMode: String,
         activityState: String,
         userPaused: Bool,
         alwaysPauseDesktop: Bool,
         pauseWhenOccluded: Bool,
         desktopOccluded: Bool,
-        powerState: PowerMonitor.PowerState,
+        powerState: PowerState,
     ) -> PlaybackPolicy {
         compute(
             presentationMode: presentationMode,

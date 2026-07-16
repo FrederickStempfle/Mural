@@ -1,10 +1,11 @@
 import AppKit
 import Foundation
+import MuralKit
 
 /// Build a fully-populated WallpaperSettingsViewModelsXPC using Codable shims.
 /// Creates one SettingsItem per video in the library.
 func buildSettingsViewModelsXPC() async -> AnyObject? {
-    let bundleID = Bundle.main.bundleIdentifier ?? "local.mural.wallpapers.extension"
+    let bundleID = Bundle.main.bundleIdentifier ?? MuralIdentifiers.extensionBundleID
     let library = VideoLibrary.shared
     let groupID = GroupID(id: "video-wallpapers")
 
