@@ -1,4 +1,5 @@
 import Foundation
+import MuralKit
 import os
 
 /// Extension-side reader for shared preferences written by the main app,

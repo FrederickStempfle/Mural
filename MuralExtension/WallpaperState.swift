@@ -1,4 +1,5 @@
 import Foundation
+import MuralKit
 import os
 import QuartzCore
 
@@ -77,7 +78,7 @@ final class WallpaperState: Sendable {
                 let state = Unmanaged<WallpaperState>.fromOpaque(observer).takeUnretainedValue()
                 state.clearCaches()
             },
-            "local.mural.wallpapers.libraryChanged" as CFString,
+            MuralIdentifiers.libraryChangedNotification as CFString,
             nil,
             .deliverImmediately,
         )

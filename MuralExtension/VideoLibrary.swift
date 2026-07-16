@@ -1,24 +1,8 @@
 import AVFoundation
 import Foundation
 import ImageIO
+import MuralKit
 import os
-
-struct VideoVariant: Codable {
-    let filename: String
-    let fps: Int
-    let resolution: CGSize
-}
-
-struct VideoEntry: Codable {
-    let id: String
-    var name: String
-    var filename: String
-    var duration: Double
-    var fps: Double
-    var resolution: CGSize
-    var dateAdded: Date
-    var variants: [VideoVariant]?
-}
 
 final class VideoLibrary: Sendable {
     static let shared = VideoLibrary()

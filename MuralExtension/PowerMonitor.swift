@@ -1,5 +1,6 @@
 import Foundation
 import IOKit.ps
+import MuralKit
 import os
 
 final class PowerMonitor: Sendable {
@@ -9,26 +10,10 @@ final class PowerMonitor: Sendable {
     private let continuations = OSAllocatedUnfairLock(initialState: [UUID: AsyncStream<PowerState>.Continuation]())
     private nonisolated(unsafe) var _batteryScheduler: NSBackgroundActivityScheduler?
 
-    struct PowerState: Equatable {
-        var thermalState: ProcessInfo.ThermalState = .nominal
-        var isOnBattery = false
-        var batteryLevel: Int = 100
-        /// Backlight brightness of the built-in display, 0.0–1.0. Defaults to 1.0
-        /// when the value can't be read (external displays, headless, etc.).
-        var displayBrightness: Float = 1.0
-
-        var shouldPause: Bool {
-            if thermalState == .critical || thermalState == .serious { return true }
-            if isOnBattery, batteryLevel < 20 { return true }
-            if displayBrightness < Self.brightnessPauseThreshold { return true }
-            return false
-        }
-
-        /// Below this brightness, the screen is effectively invisible to the user
-        /// even though `screensDidSleepNotification` hasn't fired. We treat this
-        /// as paused so the renderer stops burning battery.
-        static let brightnessPauseThreshold: Float = 0.05
-    }
+    /// The value type moved to MuralKit so `PlaybackPolicy` can be tested without
+    /// IOKit. Kept as a nested name so existing `PowerMonitor.PowerState` call
+    /// sites still read naturally.
+    typealias PowerState = MuralKit.PowerState
 
     private init() {}
 

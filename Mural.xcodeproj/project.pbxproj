@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		0B33648A2F4FCB4B00060732 /* MuralExtension.appex in Embed ExtensionKit Extensions */ = {isa = PBXBuildFile; fileRef = 0B3364832F4FCB4B00060732 /* MuralExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		FADE00010000000000000004 /* MuralKit in Frameworks */ = {isa = PBXBuildFile; productRef = FADE00010000000000000002 /* MuralKit */; };
+		FADE00010000000000000005 /* MuralKit in Frameworks */ = {isa = PBXBuildFile; productRef = FADE00010000000000000003 /* MuralKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -67,11 +69,13 @@
 		0B3364802F4FCB4B00060732 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
+				FADE00010000000000000005 /* MuralKit in Frameworks */,
 			);
 		};
 		AA9B91C62E900B9E008812A9 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
+				FADE00010000000000000004 /* MuralKit in Frameworks */,
 			);
 		};
 /* End PBXFrameworksBuildPhase section */
@@ -112,6 +116,9 @@
 				0B3364842F4FCB4B00060732 /* MuralExtension */,
 			);
 			name = MuralExtension;
+			packageProductDependencies = (
+				FADE00010000000000000003 /* MuralKit */,
+			);
 			productName = MuralExtension;
 			productReference = 0B3364832F4FCB4B00060732 /* MuralExtension.appex */;
 			productType = "com.apple.product-type.extensionkit-extension";
@@ -134,6 +141,9 @@
 				AA9B91CB2E900B9E008812A9 /* Mural */,
 			);
 			name = Mural;
+			packageProductDependencies = (
+				FADE00010000000000000002 /* MuralKit */,
+			);
 			productName = Mural;
 			productReference = AA9B91C92E900B9E008812A9 /* Mural.app */;
 			productType = "com.apple.product-type.application";
@@ -165,6 +175,9 @@
 			);
 			mainGroup = AA9B91C02E900B9E008812A9;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				FADE00010000000000000001 /* XCLocalSwiftPackageReference "Packages/MuralKit" */,
+			);
 			preferredProjectObjectVersion = 90;
 			productRefGroup = AA9B91CA2E900B9E008812A9 /* Products */;
 			projectDirPath = "";
@@ -518,6 +531,24 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		FADE00010000000000000001 /* XCLocalSwiftPackageReference "Packages/MuralKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/MuralKit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		FADE00010000000000000002 /* MuralKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MuralKit;
+		};
+		FADE00010000000000000003 /* MuralKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MuralKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = AA9B91C12E900B9E008812A9 /* Project object */;
 }

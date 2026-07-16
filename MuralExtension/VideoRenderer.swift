@@ -1,5 +1,6 @@
 import AVFoundation
 import CoreMedia
+import MuralKit
 import ObjectiveC
 import os
 

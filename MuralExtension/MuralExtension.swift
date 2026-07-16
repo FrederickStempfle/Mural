@@ -1,6 +1,7 @@
 import AppKit
 import ExtensionFoundation
 import Foundation
+import MuralKit
 
 @main
 final class MuralExtension: NSObject, AppExtension {
@@ -155,7 +156,7 @@ final class MuralExtension: NSObject, AppExtension {
                 VideoLibrary.shared.scan()
                 extensionLog("[Extension] Library changed notification received, re-scanned")
             },
-            "local.mural.wallpapers.libraryChanged" as CFString,
+            MuralIdentifiers.libraryChangedNotification as CFString,
             nil,
             .deliverImmediately,
         )
